@@ -1,0 +1,721 @@
+1
+#include<windows.h>
+#include <GL/glut.h>
+#include <stdio.h>
+int x1, y1, x2, y2;
+
+void myInit()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glMatrixMode(GL_PROJECTION);
+    gluOrtho2D(0, 500, 0, 500);
+}
+
+void draw_pixel(int x, int y)
+{
+    glBegin(GL_POINTS);
+    glVertex2i(x, y);
+    glEnd();
+}
+
+void draw_line(int x1, int x2, int y1, int y2)
+{
+    int dx, dy, i, e, x, y, incx, incy, inc1, inc2;
+    dx = x2-x1;
+    dy = y2-y1;
+    if (dx < 0)
+        dx = -dx;
+    if (dy < 0)
+        dy = -dy;
+
+    incx = 1;
+    if (x2 < x1)
+        incx = -1;
+
+    incy = 1;
+    if (y2 < y1)
+        incy = -1;
+
+    x = x1;
+    y = y1;
+
+    if (dx > dy)
+    {
+        draw_pixel(x, y);
+        e = 2 * dy-dx;
+        inc1 = 2*(dy-dx);
+        inc2 = 2*dy;
+        for (i=0; i<dx; i++)
+        {
+            if (e >= 0)
+            {
+                y += incy;
+                e += inc1;
+            }
+            else
+                e += inc2;
+            x += incx;
+            draw_pixel(x, y);
+        }
+    }
+    else
+    {
+        draw_pixel(x, y);
+        e = 2*dx-dy;
+        inc1 = 2*(dx-dy);
+        inc2 = 2*dx;
+        for (i=0; i<dy; i++)
+        {
+            if (e >= 0)
+            {
+                x += incx;
+                e += inc1;
+            }
+            else
+                e += inc2;
+            y += incy;
+            draw_pixel(x, y);
+        }
+    }
+}
+
+void myDisplay()
+{
+    draw_line(x1, x2, y1, y2);
+    glFlush();
+}
+
+int main(int argc, char **argv)
+{
+    printf( "Enter (x1, y1, x2, y2)\n");
+    scanf("%d %d %d %d", &x1, &y1, &x2, &y2);
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB);
+    glutInitWindowSize(500, 500);
+    glutInitWindowPosition(0, 0);
+    glutCreateWindow("vtucode | Bresenham's Line Drawing");
+    myInit();
+    glutDisplayFunc(myDisplay);
+    glutMainLoop();
+    return 0;
+}
+
+2
+  #include<windows.h>
+#include <GL/glut.h>
+#include <stdio.h>
+
+float squareX = 0.0f;
+float squareY = 0.0f;
+float squareSize = 0.2f;
+
+void init()
+{
+    glClearColor(1.0, 1.0, 1.0, 1.0); // Set background color to white
+    gluOrtho2D(-1.0, 1.0, -1.0, 1.0); // Set the clipping area
+}
+
+void drawSquare()
+{
+    glColor3f(0.0, 0.0, 0.0); // Set square color to black
+    glBegin(GL_QUADS);
+    glVertex2f(squareX, squareY);
+    glVertex2f(squareX + squareSize, squareY);
+    glVertex2f(squareX + squareSize, squareY + squareSize);
+    glVertex2f(squareX, squareY + squareSize);
+    glEnd();
+}
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer
+    glLoadIdentity(); // Load the identity matrix
+
+    drawSquare();
+
+    glFlush(); // Flush OpenGL buffer
+}
+
+void reshape(int width, int height)
+{
+    glViewport(0, 0, width, height); // Set the viewport to cover the new window
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+    switch (key)
+    {
+    case 'w':
+        squareY += 0.05f; // Move square upwards
+        break;
+    case 's':
+        squareY -= 0.05f; // Move square downwards
+        break;
+    case 'a':
+        squareX -= 0.05f; // Move square to the left
+        break;
+    case 'd':
+        squareX += 0.05f; // Move square to the right
+        break;
+    case 27:
+        exit(0); // Exit program when 'Esc' key is pressed
+        break;
+    }
+    glutPostRedisplay(); // Mark the current window for redisplay
+}
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv); // Initialize GLUT
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB); // Set display mode
+    glutInitWindowSize(500, 500); // Set window size
+    glutInitWindowPosition(100, 100); // Set window position
+    glutCreateWindow("vtucode| Basic Geometric Operations"); // Create the window with the given title
+    init(); // Initialize drawing
+    glutDisplayFunc(display); // Register display callback function
+    glutReshapeFunc(reshape); // Register reshape callback function
+    glutKeyboardFunc(keyboard); // Register keyboard callback function
+    glutMainLoop(); // Enter the main loop
+    return 0;
+}
+
+3
+  #include<windows.h>
+#include <GL/glut.h>
+
+GLfloat angleX = 0.0f; // Angle for rotation around x-axis
+GLfloat angleY = 0.0f; // Angle for rotation around y-axis
+GLfloat scale = 1.0f;   // Scale factor
+
+void init()
+{
+    glEnable(GL_DEPTH_TEST); // Enable depth testing for 3D rendering
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // Set background color to white
+}
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color and depth buffers
+    glLoadIdentity(); // Load the identity matrix
+
+    glTranslatef(0.0f, 0.0f, -5.0f); // Translate the cube to a distance of -5 units along z-axis
+    glRotatef(angleX, 1.0f, 0.0f, 0.0f); // Rotate the cube around x-axis
+    glRotatef(angleY, 0.0f, 1.0f, 0.0f); // Rotate the cube around y-axis
+    glScalef(scale, scale, scale); // Scale the cube
+
+    // Draw Cube
+    glBegin(GL_QUADS); // Begin drawing the cube using quads
+    // Front face
+    glColor3f(1.0f, 0.0f, 0.0f); // Red color
+    glVertex3f(-1.0f, -1.0f, 1.0f);
+    glVertex3f(1.0f, -1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 1.0f);
+    glVertex3f(-1.0f, 1.0f, 1.0f);
+    // Back face
+    glColor3f(0.0f, 1.0f, 0.0f); // Green color
+    glVertex3f(-1.0f, -1.0f, -1.0f);
+    glVertex3f(-1.0f, 1.0f, -1.0f);
+    glVertex3f(1.0f, 1.0f, -1.0f);
+    glVertex3f(1.0f, -1.0f, -1.0f);
+    // Top face
+    glColor3f(0.0f, 0.0f, 1.0f); // Blue color
+    glVertex3f(-1.0f, 1.0f, -1.0f);
+    glVertex3f(-1.0f, 1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, -1.0f);
+    // Bottom face
+    glColor3f(1.0f, 1.0f, 0.0f); // Yellow color
+    glVertex3f(-1.0f, -1.0f, -1.0f);
+    glVertex3f(1.0f, -1.0f, -1.0f);
+    glVertex3f(1.0f, -1.0f, 1.0f);
+    glVertex3f(-1.0f, -1.0f, 1.0f);
+    // Right face
+    glColor3f(1.0f, 0.0f, 1.0f); // Purple color
+    glVertex3f(1.0f, -1.0f, -1.0f);
+    glVertex3f(1.0f, 1.0f, -1.0f);
+    glVertex3f(1.0f, 1.0f, 1.0f);
+    glVertex3f(1.0f, -1.0f, 1.0f);
+    // Left face
+    glColor3f(0.0f, 1.0f, 1.0f); // Cyan color
+    glVertex3f(-1.0f, -1.0f, -1.0f);
+    glVertex3f(-1.0f, -1.0f, 1.0f);
+    glVertex3f(-1.0f, 1.0f, 1.0f);
+    glVertex3f(-1.0f, 1.0f, -1.0f);
+    glEnd(); // End of drawing cube
+
+    glFlush(); // Flush OpenGL buffer
+    glutSwapBuffers(); // Swap front and back buffers
+}
+
+void reshape(int width, int height)
+{
+    if (height == 0)
+        height = 1; // To prevent divide by 0 error when height is 0
+    glViewport(0, 0, width, height); // Set the viewport to cover the new window
+    glMatrixMode(GL_PROJECTION); // Switch to projection matrix
+    glLoadIdentity(); // Load the identity matrix
+    gluPerspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f); // Set perspective
+    glMatrixMode(GL_MODELVIEW); // Switch back to modelview matrix
+    glLoadIdentity(); // Load the identity matrix
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+    switch (key)
+    {
+    case 'q':
+    case 27: // 'q' key or ESC key
+        exit(0); // Exit program
+        break;
+    case '+':
+        scale += 0.1f; // Scale up
+        break;
+    case '-':
+        scale -= 0.1f; // Scale down
+        if (scale < 0.1f)
+            scale = 0.1f; // Prevent scaling down too small
+        break;
+    }
+    glutPostRedisplay(); // Mark the current window for redisplay
+}
+
+void specialKeys(int key, int x, int y)
+{
+    switch (key)
+    {
+    case GLUT_KEY_UP:
+        angleX += 5.0f; // Rotate cube upward
+        break;
+    case GLUT_KEY_DOWN:
+        angleX -= 5.0f; // Rotate cube downward
+        break;
+    case GLUT_KEY_LEFT:
+        angleY -= 5.0f; // Rotate cube to the left
+        break;
+    case GLUT_KEY_RIGHT:
+        angleY += 5.0f; // Rotate cube to the right
+        break;
+    }
+    glutPostRedisplay(); // Mark the current window for redisplay
+}
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv); // Initialize GLUT
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH); // Set display mode
+    glutInitWindowSize(800, 600); // Set window size
+    glutInitWindowPosition(100, 100); // Set window position
+    glutCreateWindow("vtucode | Basic 3D Geometric Operations"); // Create the window with the given title
+    init(); // Initialize drawing
+    glutDisplayFunc(display); // Register display callback function
+    glutReshapeFunc(reshape); // Register reshape callback function
+    glutKeyboardFunc(keyboard); // Register keyboard callback function
+    glutSpecialFunc(specialKeys); // Register special keys callback function
+    glutMainLoop(); // Enter the main loop
+    return 0;
+}
+
+4
+  #include<windows.h>
+#include <GL/glut.h>
+
+float angle = 0.0f;
+float scaleX = 1.0f;
+float scaleY = 1.0f;
+float translateX = 0.0f;
+float translateY = 0.0f;
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glLoadIdentity();
+
+    // Apply transformations
+    glTranslatef(translateX, translateY, 0.0f); // Translation
+    glRotatef(angle, 0.0f, 0.0f, 1.0f);         // Rotation
+    glScalef(scaleX, scaleY, 1.0f);             // Scaling
+
+    // Set color to green
+    glColor3f(0.0f, 1.0f, 0.0f); // Green color
+
+    // Draw your object here (e.g., a square)
+    glBegin(GL_QUADS);
+    glVertex2f(-0.5f, -0.5f);
+    glVertex2f(0.5f, -0.5f);
+    glVertex2f(0.5f, 0.5f);
+    glVertex2f(-0.5f, 0.5f);
+    glEnd();
+
+    glFlush();
+}
+
+
+void reshape(int w, int h)
+{
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-1.0f, 1.0f, -1.0f, 1.0f);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+    switch(key)
+    {
+    case 'r':
+        angle += 5.0f;  // Rotate clockwise by 5 degrees
+        break;
+    case 's':
+        scaleX += 0.1f; // Scale up by 10%
+        scaleY += 0.1f;
+        break;
+    case 't':
+        translateX += 0.1f; // Translate 0.1 units to the right
+        break;
+    case 'd':
+        translateX -= 0.1f; // Translate 0.1 units to the left
+        break;
+    case 'u':
+        translateY += 0.1f; // Translate 0.1 units upwards
+        break;
+    case 'n':
+        translateY -= 0.1f; // Translate 0.1 units downwards
+        break;
+    }
+    glutPostRedisplay(); // Redraw the scene
+}
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(500, 500);
+    glutInitWindowPosition(100, 100);
+    glutCreateWindow("vtucode | 2D Transformation");
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboard);
+    glutMainLoop();
+    return 0;
+}
+
+5
+  #include<windows.h>
+#include <GL/glut.h>
+
+GLfloat angle = 0.0;
+
+void init()
+{
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(45.0, 1.0, 1.0, 100.0);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+    glTranslatef(0.0, 0.0, -6.0);
+    glRotatef(angle, 1.0, 1.0, 1.0);
+
+    glBegin(GL_QUADS);
+    // Front face
+    glColor3f(1.0, 0.0, 0.0);
+    glVertex3f(-1.0, -1.0, 1.0);
+    glVertex3f(1.0, -1.0, 1.0);
+    glVertex3f(1.0, 1.0, 1.0);
+    glVertex3f(-1.0, 1.0, 1.0);
+    // Back face
+    glColor3f(0.0, 1.0, 0.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(-1.0, 1.0, -1.0);
+    glVertex3f(1.0, 1.0, -1.0);
+    glVertex3f(1.0, -1.0, -1.0);
+    // Top face
+    glColor3f(0.0, 0.0, 1.0);
+    glVertex3f(-1.0, 1.0, -1.0);
+    glVertex3f(-1.0, 1.0, 1.0);
+    glVertex3f(1.0, 1.0, 1.0);
+    glVertex3f(1.0, 1.0, -1.0);
+    // Bottom face
+    glColor3f(1.0, 1.0, 0.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(1.0, -1.0, -1.0);
+    glVertex3f(1.0, -1.0, 1.0);
+    glVertex3f(-1.0, -1.0, 1.0);
+    // Right face
+    glColor3f(1.0, 0.0, 1.0);
+    glVertex3f(1.0, -1.0, -1.0);
+    glVertex3f(1.0, 1.0, -1.0);
+    glVertex3f(1.0, 1.0, 1.0);
+    glVertex3f(1.0, -1.0, 1.0);
+    // Left face
+    glColor3f(0.0, 1.0, 1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(-1.0, -1.0, 1.0);
+    glVertex3f(-1.0, 1.0, 1.0);
+    glVertex3f(-1.0, 1.0, -1.0);
+    glEnd();
+
+    glutSwapBuffers();
+}
+
+void reshape(int w, int h)
+{
+    glViewport(0, 0, w, h);
+}
+
+void timer(int)
+{
+    angle += 2.0;
+    glutPostRedisplay();
+    glutTimerFunc(1000/60, timer, 0);
+}
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(500, 500);
+    glutCreateWindow("vtucode | 3D Transformations");
+
+    init();
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutTimerFunc(0, timer, 0);
+
+    glEnable(GL_DEPTH_TEST);
+
+    glutMainLoop();
+    return 0;
+}
+
+6
+  #include<windows.h>
+#include <GL/glut.h>
+
+float trianglePosX = -0.5f; // Initial position of the triangle
+float triangleSpeed = 0.005f; // Speed of the triangle
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+    glLoadIdentity();
+
+    // Draw the triangle
+    glBegin(GL_TRIANGLES);
+    glColor3f(1.0f, 0.0f, 0.0f);   // Red color
+    glVertex2f(trianglePosX, 0.0f);
+    glVertex2f(trianglePosX + 0.1f, 0.2f);
+    glVertex2f(trianglePosX + 0.2f, 0.0f);
+    glEnd();
+
+    glutSwapBuffers();
+}
+
+void update(int value)
+{
+    // Update the position of the triangle
+    trianglePosX += triangleSpeed;
+
+    // If the triangle goes beyond the right edge of the window, reset its position
+    if (trianglePosX > 1.1f)
+        trianglePosX = -0.5f;
+
+    // Redisplay the scene
+    glutPostRedisplay();
+
+    // Call update() again after 16 milliseconds
+    glutTimerFunc(16, update, 0);
+}
+
+void init()
+{
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // White background color
+}
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(800, 600); // Window size
+    glutCreateWindow("vtucode | OpenGL Animation");
+
+    init();
+
+    glutDisplayFunc(display);
+    glutTimerFunc(16, update, 0); // Call update() after 16 milliseconds
+
+    glutMainLoop();
+    return 0;
+}
+
+7
+  Can't create, edit or upload … Not enough storage. Get 100 GB of storage for ₹130.00 ₹0 for 1 month.
+import cv2
+
+# Load the image
+image = cv2.imread('exno7.jpg')
+
+# Get image height and width
+height, width = image.shape[:2]
+
+# Split the image into four quadrants
+top_left = image[0:height//2, 0:width//2]
+top_right = image[0:height//2, width//2:width]
+bottom_left = image[height//2:height, 0:width//2]
+bottom_right = image[height//2:height, width//2:width]
+
+# Display the original image and the quadrants
+cv2.imshow('Original Image', image)
+cv2.imshow('Top Left Quadrant', top_left)
+cv2.imshow('Top Right Quadrant', top_right)
+cv2.imshow('Bottom Left Quadrant', bottom_left)
+cv2.imshow('Bottom Right Quadrant', bottom_right)
+
+# Wait for a key press and close all windows
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+8
+import cv2
+import numpy as np
+
+# Load the image
+image = cv2.imread('exno8.jpg')
+
+# Define rotation angle (in degrees)
+angle = 45
+
+# Define scaling factors
+scale_x = 1.5
+scale_y = 1.5
+
+# Define translation offsets
+tx = 50
+ty = 50
+
+# Get image dimensions
+height, width = image.shape[:2]
+
+# Define rotation matrix
+rotation_matrix = cv2.getRotationMatrix2D((width/2, height/2), angle, 1)
+
+# Apply rotation
+rotated_image = cv2.warpAffine(image, rotation_matrix, (width, height))
+
+# Apply scaling
+scaled_image = cv2.resize(image, None, fx=scale_x, fy=scale_y)
+
+# Apply translation
+translation_matrix = np.float32([[1, 0, tx], [0, 1, ty]])
+translated_image = cv2.warpAffine(image, translation_matrix, (width, height))
+
+# Display images
+cv2.imshow('Original Image', image)
+cv2.imshow('Rotated Image', rotated_image)
+cv2.imshow('Scaled Image', scaled_image)
+cv2.imshow('Translated Image', translated_image)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+  9
+import cv2
+import numpy as np
+
+# Load the image
+image = cv2.imread('exno9.jpg', cv2.IMREAD_GRAYSCALE)
+
+# Apply edge detection using Canny
+edges = cv2.Canny(image, 100, 200)
+
+# Apply texture analysis using Laplacian of Gaussian (LoG)
+image_blur = cv2.GaussianBlur(image, (3, 3), 0)
+image_log = cv2.Laplacian(image_blur, cv2.CV_64F)
+image_log = np.uint8(np.absolute(image_log))
+
+# Display images
+cv2.imshow('Original Image', image)
+cv2.imshow('Edges', edges)
+cv2.imshow('Texture (LoG)', image_log)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+  10
+  import cv2
+
+# Load the image
+image = cv2.imread('test.jpg')
+
+# Apply Gaussian blur
+gaussian_blur = cv2.GaussianBlur(image, (15, 15), 0)
+
+# Apply median blur
+median_blur = cv2.medianBlur(image, 15)
+
+# Apply bilateral filter
+bilateral_blur = cv2.bilateralFilter(image, 15, 75, 75)
+
+# Display images
+cv2.imshow('Original Image', image)
+cv2.imshow('Gaussian Blur', gaussian_blur)
+cv2.imshow('Median Blur', median_blur)
+cv2.imshow('Bilateral Blur', bilateral_blur)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+  11
+  import cv2
+
+# Load the image
+image = cv2.imread('test.jpg')
+
+# Convert the image to grayscale
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# Find contours
+contours, _ = cv2.findContours(gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+# Draw contours on the original image
+contour_image = image.copy()
+cv2.drawContours(contour_image, contours, -1, (0, 255, 0), 2)
+
+# Display the image with contours
+cv2.imshow('Image with Contours', contour_image)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+  12
+  import cv2
+
+# Load the pre-trained Haar Cascade classifier for face detection
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+# Load the image
+image = cv2.imread('test.jpg')
+
+# Convert the image to grayscale
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# Detect faces in the image
+faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+# Draw rectangles around the detected faces
+for (x, y, w, h) in faces:
+    cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+# Display the image with detected faces
+cv2.imshow('Faces Detected', image)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
