@@ -557,7 +557,7 @@ int main(int argc, char** argv)
 }
 
 7
-  Can't create, edit or upload … Not enough storage. Get 100 GB of storage for ₹130.00 ₹0 for 1 month.
+
 import cv2
 
 # Load the image
